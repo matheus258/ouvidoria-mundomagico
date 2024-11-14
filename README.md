@@ -8,6 +8,9 @@ Este projeto de ouvidoria permite o gerenciamento e visualização de manifesta�
 - Matheus Marques
 - Higor
 - Ruan Montenegro
+- Juan Wagner
+- Roberto
+- Gustavo
 
 ## Estrutura do Projeto
 
