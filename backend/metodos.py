@@ -10,4 +10,8 @@ def alterarManifestacao(conexao):
 def pesquisarManifestacao(conexao):
     print("criar metodo")
 def quantidadeManifestacoes (conexao):
-    print("criar metodo")
+    manifestacao = listarBancoDados(conexao, 'select count(*) from Manifestacoes')
+    if len(manifestacao) > 0:
+        print('Temos',manifestacao[0][0], 'manifestações.')
+    else:
+        print('Não existem manifestações a serem exibidas')
