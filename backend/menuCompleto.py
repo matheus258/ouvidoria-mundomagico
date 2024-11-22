@@ -14,7 +14,7 @@ while opcao != 7:
     elif opcao == 3:
         pesquisarManifestacao(conexao)
     elif opcao == 4:
-        print('Remover')
+        removerPeloCodigo(conexao)
     elif opcao == 5:
        alterarManifestacao(conexao)
     elif opcao == 6:
