@@ -15,7 +15,13 @@ def adicionarManifestacao (conexao):
     insertNoBancoDados(conexao, consultaInserir, valores)
     
 def alterarManifestacao(conexao):
-    print("criar metodo")
+    codigoAlterar = input("Digite o código da manifestação que deseja alterar: ")
+    novaDescricao = input("Digite a nova descrição para a manifestação: ")
+    consultaAlterar = "update Manifestacoes set descricao = %s where codigo = %s"
+    valores = [novaDescricao, codigoAlterar]
+    atualizarBancoDados(conexao, consultaAlterar, valores)
+    print("- Manifestação alterada com sucesso!")
+
 def pesquisarManifestacao(conexao):
     print("criar metodo")
 def quantidadeManifestacoes (conexao):
@@ -31,7 +37,7 @@ def removerPeloCodigo(conexao) :
     consultaRemover = " delete from Manifestacoes where codigo = %"
     linhasAfetadas = excluirBancoDados(conexao, consultaRemover, (codigoRemover,))
 
-    if linhasAfetadas > 0:
+    if linhasAfetadas:
         print("Manifestação Removida com sucesso !")
     else :
         print("Não existe Manifestação para o codigo informado.")
