@@ -4,7 +4,16 @@ from operacoesBD import *
 def listarManifestacao (conexao):
     print("criar metodo")
 def adicionarManifestacao (conexao):
-    print("criar metodo")
+    consultaInserir = 'insert into Manifestacoes(descricao, autor, categoria) values(%s,%s,%s)'
+
+    descricao = input('Digite a sua manifestacao: ')
+    autor = input('Digite o seu nome: ')
+    categoria = input('Digite o tipo de manifestacao: ')
+
+    valores = [descricao, autor, categoria]
+
+    insertNoBancoDados(conexao, consultaInserir, valores)
+    
 def alterarManifestacao(conexao):
     print("criar metodo")
 def pesquisarManifestacao(conexao):
