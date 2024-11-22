@@ -2,7 +2,13 @@ from operacoesBD import *
 
 
 def listarManifestacao (conexao):
-    print("criar metodo")
+    manifestacao = listarBancoDados(conexao, 'select * from Manifestacoes')
+    if len(manifestacao) > 0:
+        print('Listar de manifestações')
+        for item in manifestacao:
+            print('Manifestação: ', item[0], '\nNome: ', item[1], '\nDescrição: ', item[2], '\nTipo: ', item[3])
+    else:
+        print('Não existem manifestações a serem exibidas')
 def adicionarManifestacao (conexao):
     consultaInserir = 'insert into Manifestacoes(descricao, autor, categoria) values(%s,%s,%s)'
 
