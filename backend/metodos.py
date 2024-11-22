@@ -24,3 +24,15 @@ def quantidadeManifestacoes (conexao):
         print('Temos',manifestacao[0][0], 'manifestações.')
     else:
         print('Não existem manifestações a serem exibidas')
+        
+def removerPeloCodigo(conexao) :
+    codigoRemover = int(input("Digite o codigo para remover:"))
+
+    consultaRemover = " delete from Manifestacoes where codigo = %"
+    linhasAfetadas = excluirBancoDados(conexao, consultaRemover, (codigoRemover,))
+
+    if linhasAfetadas > 0:
+        print("Manifestação Removida com sucesso !")
+    else :
+        print("Não existe Manifestação para o codigo informado.")
+        
