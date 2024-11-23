@@ -29,7 +29,34 @@ def alterarManifestacao(conexao):
     print("- Manifestação alterada com sucesso!")
 
 def pesquisarManifestacao(conexao):
-    print("criar metodo")
+    print("escolha o modo que você quer pesquisar!")
+    print("1) pesquisar por codigo")
+    print("2) pesquisar por categoria")
+    modo = int(input("digite a opção."))
+    if modo == 1:
+        codigo = int(input("digite o codigo da manifestação que você deseja pesquisar: "))
+        consulta = f"select * from manifestacoes where codigo = '{codigo}'"
+        resultados = listarBancoDados(conexao, consulta)
+        if resultados:
+            for item in resultados:
+                print("Codigo: " +  str(item[0] + ", Descrição: " + item[1] + ", Autor: " item[2] + ", Categoria: " + item[3]) 
+        else:
+            print("Nenhuma manifestação encontrada! ")
+
+    elif modo == 2:
+        categoria = input("digite o numero da categoria que você deseja pesquisar. ")
+        consulta = f"select * from manifestacoes where categoria like '%{categoria}%'"
+        resultados = listarBancoDados(conexao, consulta)
+        if resultados:
+            for item in resultados:
+                print("Código: " + str(item[0]) + ", Descrição: " + item[1] + ", Autor: " + item[2] + ", Categoria: " + item[3])
+
+        else:
+            print('Temos',manifestacao[0][0], 'manifestações.'")
+
+    else:
+                ("Opção Invalida! ")
+
 def quantidadeManifestacoes (conexao):
     manifestacao = listarBancoDados(conexao, 'select count(*) from Manifestacoes')
     if len(manifestacao) > 0:
