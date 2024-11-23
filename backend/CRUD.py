@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from operacoesBD import *
 
-conexao = criarConexao('localhost', 'root', 'Kar21985@', 'ouvidoria_final')
+conexao = criarConexao('localhost', 'root', 'senha', 'ouvidoria_final')
 
 app = Flask(__name__)
 CORS(app)
