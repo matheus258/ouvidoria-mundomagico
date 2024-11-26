@@ -1,4 +1,7 @@
 <template>
+  <div>
+    <PagesRouter />
+  </div>
   <div class="cadastrar">
     <h2>Cadastrar Manifestação</h2>
     <form @submit.prevent="cadastrarManifestacao">
@@ -46,6 +49,7 @@
 <script setup>
 import { ref } from 'vue';
 import axios from '../api/http-common';
+import PagesRouter from './PagesRouter.vue';
 
 const descricao = ref('');
 const autor = ref('');

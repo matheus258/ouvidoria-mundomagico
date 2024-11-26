@@ -1,15 +1,10 @@
 <script setup>
-import HomePage from './components/HomePage.vue';
-import CadastrarManifestacao from './components/CadastrarManifestacao.vue';
-import Manifestacoes from './components/Manifestacoes.vue';
 
 </script>
 
 <template>
   <div class="container">
-    <HomePage />
-    <CadastrarManifestacao />
-    <Manifestacoes />
+    <router-view></router-view> <!-- Exibe o componente de acordo com a rota -->
   </div>
 </template>
 

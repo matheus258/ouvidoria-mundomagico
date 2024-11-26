@@ -2,10 +2,10 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from operacoesBD import *
 
-conexao = criarConexao('localhost', 'root', 'senha', 'ouvidoria_final')
+conexao = criarConexao('localhost', 'root', 'SENHA', 'ouvidoria_final')
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins="http://localhost:5173")
 # Endpoint para listar todas as manifestações (GET)
 @app.route('/manifestacoes', methods=['GET'])
 def listar_manifestacoes():
@@ -76,22 +76,47 @@ def excluir_manifestacao(codigo):
 
 # Endpoint para pesquisar manifestações por código ou categoria (GET com parâmetros)
 @app.route('/manifestacoes/pesquisar', methods=['GET'])
-def pesquisar_manifestacao():
+def pesquisar_manifestacoes():
     codigo = request.args.get('codigo')
     categoria = request.args.get('categoria')
 
-    if codigo:
-        consulta = 'SELECT * FROM Manifestacoes WHERE codigo = %s'
-        resultados = listarBancoDados(conexao, consulta, (codigo,))
-    elif categoria:
-        consulta = "SELECT * FROM Manifestacoes WHERE categoria LIKE %s"
-        resultados = listarBancoDados(conexao, consulta, ('%' + categoria + '%',))
-    else:
-        return jsonify({'mensagem': 'Informe um código ou categoria para pesquisar!'}), 400
+    # Verificando se pelo menos um filtro foi fornecido
+    if not codigo and not categoria:
+        return jsonify({'erro': 'É necessário informar pelo menos um filtro: código ou categoria.'}), 400
 
-    if resultados:
-        return jsonify([{'codigo': item[0], 'descricao': item[1], 'autor': item[2], 'categoria': item[3]} for item in resultados])
-    return jsonify({'mensagem': 'Nenhuma manifestação encontrada.'}), 404
+    # Iniciando a consulta base
+    query = "SELECT * FROM Manifestacoes WHERE 1=1"
+    params = []
+
+    # Adicionando o filtro de código, caso fornecido
+    if codigo:
+        query += " AND codigo = %s"
+        params.append(codigo)
+
+    # Adicionando o filtro de categoria, caso fornecido
+    if categoria:
+        query += " AND categoria = %s"
+        params.append(categoria)
+
+    # Realizando a consulta no banco de dados
+    cursor = conexao.cursor()
+    cursor.execute(query, tuple(params))
+    manifestacoes = cursor.fetchall()
+    cursor.close()
+
+    # Verificando se encontrou resultados
+    if manifestacoes:
+        return jsonify([
+            {
+                'codigo': item[0],
+                'autor': item[1],
+                'descricao': item[2],
+                'categoria': item[3]
+            }
+            for item in manifestacoes
+        ])
+    
+    return jsonify({'mensagem': 'Nenhuma manifestação encontrada'}), 404
 
 # Rodando o servidor Flask
 if __name__ == '__main__':

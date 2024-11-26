@@ -1,13 +1,39 @@
 <template>
+  <div class="pagerouter">
+    <PagesRouter />
+  </div>
+
   <div class="home">
     <h1 class="text-principal">Manifestações</h1>
-    <button @click="carregarManifestacoes">Carregar Manifestações</button>
+
+    <button @click="carregarManifestacoes" class="carregar-btn">Carregar Manifestações</button>
+
+    <!-- Filtros -->
+    <div class="filter-container">
+      <!-- Filtro de Categoria -->
+      <select v-model="filtroCategoria" class="form-control filtro-categoria">
+        <option value="">Filtrar por categoria</option>
+        <option value="RECLAMACAO">Reclamação</option>
+        <option value="SUGESTAO">Sugestão</option>
+        <option value="ELOGIO">Elogio</option>
+        <option value="DENUNCIA">Denúncia</option>
+        <option value="INFORMACAO">Informação</option>
+        <option value="OUTROS">Outros</option>
+      </select>
+      <button class="pesquisar-btn" @click="filtrarPorCategoria">Pesquisar por Categoria</button>
+    </div>
+
+    <!-- Aviso caso não haja seleção -->
+    <div v-if="naoSelecionado" class="aviso">
+      Por favor, selecione uma categoria para filtrar.
+    </div>
 
     <div v-if="manifestacoes.length" class="card-container">
       <div
         class="card"
         v-for="manifestacao in manifestacoes"
         :key="manifestacao.codigo"
+        :style="`border-color: ${getCategoriaBorderColor(manifestacao.categoria)}; border-width: 3px;`"
         style="width: 18rem;"
         @click="abrirModal(manifestacao)"
       >
@@ -31,15 +57,13 @@
             <p><strong>Autor:</strong> {{ modalManifestacao.autor }}</p>
             <p><strong>Categoria:</strong> {{ modalManifestacao.categoria }}</p>
 
-            <!-- Botão Editar -->
-            <button @click="habilitarEdicao" class="btn btn-warning">Editar</button>
+            <!-- Botões Editar e Excluir -->
+            <div class="button-group">
+              <button @click="habilitarEdicao" class="btn btn-warning">Editar</button>
+              <button @click="excluirManifestacao(modalManifestacao.codigo)" class="btn btn-danger ms-2">Excluir</button>
+            </div>
 
-            <!-- Botão Excluir -->
-            <button @click="excluirManifestacao(modalManifestacao.codigo)" class="btn btn-danger ms-2">
-              Excluir
-            </button>
-
-            <!-- Formulário de edição visível apenas se `editando` for true -->
+            <!-- Formulário de Edição -->
             <div v-if="editando" class="mt-3">
               <div class="form-group">
                 <label for="descricao">Descrição:</label>
@@ -75,6 +99,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from '../api/http-common';
+import PagesRouter from './PagesRouter.vue';
 
 const manifestacoes = ref([]);
 const modalAberto = ref(false);
@@ -83,7 +108,10 @@ const editando = ref(false);
 const novaDescricao = ref('');
 const novoAutor = ref('');
 const novaCategoria = ref('');
+const filtroCategoria = ref('');
+const naoSelecionado = ref(false); // Flag para exibir a mensagem de aviso
 
+// Carregar manifestações
 const carregarManifestacoes = async () => {
   try {
     const response = await axios.get('/manifestacoes');
@@ -93,18 +121,21 @@ const carregarManifestacoes = async () => {
   }
 };
 
+// Abrir modal
 const abrirModal = (manifestacao) => {
   modalManifestacao.value = { ...manifestacao };
   modalAberto.value = true;
   editando.value = false; // Garante que o formulário começa oculto
 };
 
+// Fechar modal
 const fecharModal = () => {
   modalAberto.value = false;
   modalManifestacao.value = {};
   editando.value = false;
 };
 
+// Habilitar edição
 const habilitarEdicao = () => {
   novaDescricao.value = modalManifestacao.value.descricao;
   novoAutor.value = modalManifestacao.value.autor;
@@ -112,6 +143,7 @@ const habilitarEdicao = () => {
   editando.value = true;
 };
 
+// Editar manifestação
 const editarManifestacao = async (codigo) => {
   try {
     const dadosAtualizados = {
@@ -127,6 +159,7 @@ const editarManifestacao = async (codigo) => {
   }
 };
 
+// Excluir manifestação
 const excluirManifestacao = async (codigo) => {
   try {
     await axios.delete(`/manifestacoes/${codigo}`);
@@ -137,25 +170,42 @@ const excluirManifestacao = async (codigo) => {
   }
 };
 
-const cadastrarManifestacao = async () => {
+// Função para filtrar por categoria
+const filtrarPorCategoria = async () => {
   try {
-    const novaManifestacao = {
-      autor: novoAutor.value,
-      descricao: novaDescricao.value,
-      categoria: novaCategoria.value,
-    };
+    if (!filtroCategoria.value) {
+      naoSelecionado.value = true; // Exibe a mensagem de aviso
+      return;
+    }
 
-    await axios.post('/manifestacoes', novaManifestacao);
-
-    // Limpar os campos após o cadastro
-    novoAutor.value = '';
-    novaDescricao.value = '';
-    novaCategoria.value = 'RECLAMACAO';
-
-    // Atualiza a lista
-    carregarManifestacoes();
+    const response = await axios.get('/manifestacoes/pesquisar', {
+      params: { categoria: filtroCategoria.value }
+    });
+    manifestacoes.value = response.data;
+    naoSelecionado.value = false; // Esconde a mensagem de aviso
   } catch (error) {
-    console.error('Erro ao cadastrar manifestação:', error);
+    console.error("Erro ao pesquisar por categoria:", error);
+    alert("Erro ao buscar por categoria. Tente novamente.");
+  }
+};
+
+// Função para retornar a cor da borda de acordo com a categoria
+const getCategoriaBorderColor = (categoria) => {
+  switch (categoria) {
+    case 'RECLAMACAO':
+      return 'red';
+    case 'SUGESTAO':
+      return 'blue';
+    case 'ELOGIO':
+      return 'green';
+    case 'DENUNCIA':
+      return 'orange';
+    case 'INFORMACAO':
+      return 'purple';
+    case 'OUTROS':
+      return 'gray';
+    default:
+      return 'black'; // Cor padrão
   }
 };
 
@@ -178,59 +228,85 @@ onMounted(() => {
   text-align: center;
 }
 
-.card-container {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 2rem;
-}
-
-.card {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-}
-
-button {
+.carregar-btn {
   background-color: #42b983;
   color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.pesquisar-btn {
+  background-color: #42b983;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+
 }
 
-button:hover {
+.carregar-btn:hover {
   background-color: #368a6e;
 }
 
-/* Modal styles */
-.modal-content {
-  max-width: 500px;
-  margin: auto;
+.card-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 40px; /* Ajusta o espaçamento entre o filtro e as manifestações */
 }
 
-.modal-header, .modal-footer {
-  padding: 10px;
+.card {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+  padding: 20px;
+  border-radius: 8px;
 }
 
-textarea, input, select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.card:hover {
+  transform: scale(1.05);
 }
 
-textarea:focus, input:focus, select:focus {
-  border-color: #42b983;
-  outline: none;
+.filter-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
-.modal-content {
-  color: black;
+
+.filtro-categoria {
+  width: 200px;
+  margin-right: 15px;
+}
+
+.aviso {
+  color: red;
+  font-size: 1.2rem;
+  margin-top: 20px;
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #ddd;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
 }
 </style>
