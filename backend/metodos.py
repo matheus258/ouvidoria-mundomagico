@@ -9,15 +9,15 @@ def listarManifestacao (conexao):
             print('Manifestação: ', item[0], '\nNome: ', item[1], '\nDescrição: ', item[2], '\nTipo: ', item[3])
     else:
         print('Não existem manifestações a serem exibidas')
+        
 def adicionarManifestacao (conexao):
     consultaInserir = 'insert into Manifestacoes(descricao, autor, categoria) values(%s,%s,%s)'
 
     descricao = input('Digite a sua manifestacao: ')
     autor = input('Digite o seu nome: ')
     categoria = input('Digite o tipo de manifestacao: ')
-
     valores = [descricao, autor, categoria]
-
+    
     insertNoBancoDados(conexao, consultaInserir, valores)
     
 def alterarManifestacao(conexao):
@@ -37,25 +37,18 @@ def pesquisarManifestacao(conexao):
         codigo = int(input("digite o codigo da manifestação que você deseja pesquisar: "))
         consulta = f"select * from manifestacoes where codigo = '{codigo}'"
         resultados = listarBancoDados(conexao, consulta)
-        if resultados:
-            for item in resultados:
-                print("Codigo: " +  str(item[0] + ", Descrição: " + item[1] + ", Autor: " item[2] + ", Categoria: " + item[3]) 
-        else:
-            print("Nenhuma manifestação encontrada! ")
 
     elif modo == 2:
         categoria = input("digite o numero da categoria que você deseja pesquisar. ")
         consulta = f"select * from manifestacoes where categoria like '%{categoria}%'"
         resultados = listarBancoDados(conexao, consulta)
-        if resultados:
-            for item in resultados:
-                print("Código: " + str(item[0]) + ", Descrição: " + item[1] + ", Autor: " + item[2] + ", Categoria: " + item[3])
-
-        else:
-            print('Temos',manifestacao[0][0], 'manifestações.'")
+        
+    if resultados:
+        for item in resultados:
+            print("Código: " + str(item[0]) + ", Descrição: " + item[1] + ", Autor: " + item[2] + ", Categoria: " + item[3])
 
     else:
-                ("Opção Invalida! ")
+        print('Temos',manifestacao[0][0], 'manifestações.')
 
 def quantidadeManifestacoes (conexao):
     manifestacao = listarBancoDados(conexao, 'select count(*) from Manifestacoes')
